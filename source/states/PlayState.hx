@@ -5,8 +5,6 @@ import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
-import flixel.ui.FlxBar;
-import flixel.util.FlxColor;
 import flixel.system.FlxAssets.FlxShader;
 
 import openfl.net.FileReference;
@@ -31,12 +29,15 @@ class PlayState extends FlxState
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
 
+    var uiVisible:Bool = true;
+    var uiElements:Array<Dynamic> = [];
+
     override public function create():Void
     {
         super.create();
 
         // =========================
-        // Fundo padrão
+        // Default background
         // =========================
         bg = new FlxSprite();
         bg.loadGraphic("assets/images/bg/cheeseburger.png");
@@ -47,7 +48,6 @@ class PlayState extends FlxState
         // Shader
         // =========================
         shader = new CustomWaveShader();
-
         shader.uTime.value = [0.0];
         shader.uSpeed.value = [speed];
         shader.uFrequency.value = [frequency];
@@ -57,82 +57,114 @@ class PlayState extends FlxState
         bg.shader = shader;
 
         // =========================
-        // Botão carregar imagem
+        // Load image button
         // =========================
-        var loadBtn = new FlxButton(20, 20, "Add image", loadImage);
+        var loadBtn = new FlxButton(20, 20, "Add Image", loadImage);
         add(loadBtn);
+        uiElements.push(loadBtn);
 
         // =========================
         // Wave Amplitude
         // =========================
         ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
+        uiElements.push(ampText);
 
-        add(new FlxButton(20, 95, "-", function()
+        var ampMinus = new FlxButton(20, 95, "-", function()
         {
             waveAmplitude = Math.max(0, waveAmplitude - 0.005);
             updateShaderValues();
-        }));
+        });
+        add(ampMinus);
+        uiElements.push(ampMinus);
 
-        add(new FlxButton(60, 95, "+", function()
+        var ampPlus = new FlxButton(60, 95, "+", function()
         {
             waveAmplitude += 0.005;
             updateShaderValues();
-        }));
+        });
+        add(ampPlus);
+        uiElements.push(ampPlus);
 
         // =========================
         // Frequency
         // =========================
         freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);
         add(freqText);
+        uiElements.push(freqText);
 
-        add(new FlxButton(20, 165, "-", function()
+        var freqMinus = new FlxButton(20, 165, "-", function()
         {
             frequency = Math.max(1, frequency - 1);
             updateShaderValues();
-        }));
+        });
+        add(freqMinus);
+        uiElements.push(freqMinus);
 
-        add(new FlxButton(60, 165, "+", function()
+        var freqPlus = new FlxButton(60, 165, "+", function()
         {
             frequency += 1;
             updateShaderValues();
-        }));
+        });
+        add(freqPlus);
+        uiElements.push(freqPlus);
 
         // =========================
         // Speed
         // =========================
         speedText = new FlxText(20, 210, 400, "Speed: " + speed);
         add(speedText);
+        uiElements.push(speedText);
 
-        add(new FlxButton(20, 235, "-", function()
+        var speedMinus = new FlxButton(20, 235, "-", function()
         {
             speed = Math.max(0.1, speed - 0.1);
             updateShaderValues();
-        }));
+        });
+        add(speedMinus);
+        uiElements.push(speedMinus);
 
-        add(new FlxButton(60, 235, "+", function()
+        var speedPlus = new FlxButton(60, 235, "+", function()
         {
             speed += 0.1;
             updateShaderValues();
-        }));
+        });
+        add(speedPlus);
+        uiElements.push(speedPlus);
 
         // =========================
         // uTime
         // =========================
         timeText = new FlxText(20, 280, 400, "uTime: 0");
         add(timeText);
+        uiElements.push(timeText);
     }
 
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
 
+        // Update shader time
         shader.uTime.value[0] += elapsed;
 
         if (shader.uTime.value[0] > 999999)
             shader.uTime.value[0] = 0;
 
         timeText.text = "uTime: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
+
+        // =========================
+        // Toggle UI with SPACE
+        // =========================
+        if (FlxG.keys.justPressed.SPACE)
+        {
+            uiVisible = !uiVisible;
+
+            for (element in uiElements)
+            {
+                element.visible = uiVisible;
+                element.active = uiVisible;
+            }
+        }
     }
 
     function updateShaderValues():Void
@@ -147,14 +179,14 @@ class PlayState extends FlxState
     }
 
     // =========================
-    // Carregar imagem
+    // Load custom image
     // =========================
     function loadImage():Void
     {
         fileRef = new FileReference();
         fileRef.addEventListener(Event.SELECT, onFileSelected);
         fileRef.browse([
-            new FileFilter("Imagens", "*.png;*.jpg;*.jpeg")
+            new FileFilter("Images", "*.png;*.jpg;*.jpeg")
         ]);
     }
 
@@ -199,7 +231,6 @@ class CustomWaveShader extends FlxShader
         const int EFFECT_TYPE_FLAG = 0;
 
         uniform int effectType;
-
         uniform float uSpeed;
         uniform float uFrequency;
         uniform float uWaveAmplitude;
