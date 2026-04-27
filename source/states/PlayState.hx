@@ -1,16 +1,15 @@
 package states;
 
 import flixel.FlxState;
-import flathx.util.FlxDirectionFlags;
 import flixel.FlxSprite;
 import flixel.FlxG;
-import flixel.group.FlxTypedGroup;
+import flixel.group.FlxGroup;
 import flixel.util.FlxTimer;
 import backend.Paths;
 
 class PlayState extends FlxState {
     var packman:FlxSprite;
-    var body:FlxTypedGroup<FlxSprite>;
+    var body:FlxGroup;
     var moveSpeed:Float = 0.15;
     var direction:Int = 1; // 0 = up, 1 = down
     var gridSize:Int = 32;
@@ -18,37 +17,30 @@ class PlayState extends FlxState {
     override public function create() {
         super.create();
 
-        // Fundo simples
         bgColor = 0xFF000000;
 
-        // Grupo do corpo
-        body = new FlxTypedGroup<FlxSprite>();
+        body = new FlxGroup();
         add(body);
 
-        // Cabeça da cobra usando sprite com animação idle
         packman = new FlxSprite(FlxG.width / 2, FlxG.height / 2);
-        packman.frames = Paths.getSparrowAtlas("packman"); // assets/images/packman.png + xml
+        packman.frames = Paths.getSparrowAtlas("packman");
         packman.animation.addByPrefix("idle", "idle", 24, true);
         packman.animation.play("idle");
         packman.scale.set(0.5, 0.5);
         packman.updateHitbox();
         add(packman);
 
-        // Timer de movimento
-        new FlxTimer().start(moveSpeed, moveSnake, 0);
+        new FlxTimer().start(moveSpeed, movePackman, 0);
     }
 
-    function moveSnake(timer:FlxTimer) {
-        // Controles
+    function movePackman(timer:FlxTimer) {
         if (FlxG.keys.justPressed.UP) direction = 0;
         if (FlxG.keys.justPressed.DOWN) direction = 1;
 
-        // Segmento antigo
         var segment = new FlxSprite(packman.x, packman.y);
-        segment.makeGraphic(gridSize, gridSize, 0xFF00FF00);
+        segment.makeGraphic(gridSize, gridSize, 0xFFFFFF00);
         body.add(segment);
 
-        // Movimento vertical
         switch (direction) {
             case 0:
                 packman.y -= gridSize;
@@ -56,13 +48,11 @@ class PlayState extends FlxState {
                 packman.y += gridSize;
         }
 
-        // Limite de tela
         if (packman.y < 0) packman.y = FlxG.height - gridSize;
         if (packman.y > FlxG.height - gridSize) packman.y = 0;
 
-        // Limitar tamanho da cobra
         if (body.length > 8) {
-            var old = body.members[0];
+            var old = cast(body.members[0], FlxSprite);
             if (old != null) {
                 body.remove(old, true);
                 old.destroy();
@@ -73,8 +63,7 @@ class PlayState extends FlxState {
     override public function update(elapsed:Float) {
         super.update(elapsed);
 
-        // Mantém idle sempre ativo
-        if (packman.animation.curAnim == null || !packman.animation.curAnim.name.equals("idle")) {
+        if (packman.animation.curAnim == null || packman.animation.curAnim.name != "idle") {
             packman.animation.play("idle");
         }
     }
