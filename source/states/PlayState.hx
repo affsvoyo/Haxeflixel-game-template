@@ -33,7 +33,7 @@ class PlayState extends FlxState
         // Background padrão
         // =========================
         bg = new FlxSprite();
-        bg.loadGraphic("assets/images/bg/default.png");
+        bg.loadGraphic("assets/images/bg/cheeseburger.png");
         bg.screenCenter();
         add(bg);
 
@@ -42,11 +42,11 @@ class PlayState extends FlxState
         // =========================
         shader = new CustomWaveShader();
 
-        shader.uTime.value = [0.0];
-        shader.uSpeed.value = [2.0];
-        shader.uFrequency.value = [10.0];
-        shader.uWaveAmplitude.value = [0.02];
-        shader.effectType.value = [0]; // FLAG
+        shader.uTime. = 0.0;
+        shader.uSpeed = 2.0;
+        shader.uFrequency = 5.0;
+        shader.uWaveAmplitude = 0.1;
+        shader.effectType = 0; // FLAG
 
         bg.shader = shader;
 
@@ -96,15 +96,15 @@ class PlayState extends FlxState
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
+        var Update:Float = 0.0;
 
         // =========================
         // Atualização contínua do shader
         // =========================
-        shader.uTime.value[0] += elapsed;
+        Update += elapsed;
 
         // Evita overflow
-        if (shader.uTime.value[0] > 999999)
-            shader.uTime.value[0] = 0;
+        shader.uTime = Update;
 
         // Atualiza texto visual
         timeText.text = "uTime: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
