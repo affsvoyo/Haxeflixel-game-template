@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-    <meta title="Shader Renderer For Pc" package="com.pc.Render" version="0.0.1" company="Ren" />
+    <meta title="Strident crisis Shader generator For Pc" package="com.pc.Render" version="0.0.1" company="Ren" />
     <app main="Main" file="Stfp" path="export" />
     <window width="1280" height="720" fps="60" background="#000000" />
     <source path="source" />
