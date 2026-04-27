@@ -42,18 +42,18 @@ class PlayState extends FlxState
         // =========================
         shader = new CustomWaveShader();
 
-        shader.uTime. = 0.0;
-        shader.uSpeed = 2.0;
-        shader.uFrequency = 5.0;
-        shader.uWaveAmplitude = 0.1;
-        shader.effectType = 0; // FLAG
+        shader.uTime.value = [0.0];
+        shader.uSpeed.value = [1.0];
+        shader.uFrequency.value = [5.0];
+        shader.uWaveAmplitude.value = [0.1];
+        shader.effectType.value = [0]; // FLAG
 
         bg.shader = shader;
 
         // =========================
         // Botão carregar imagem
         // =========================
-        var loadButton = new FlxUIButton(20, 20, "Adicionar Imagem", loadImage);
+        var loadButton = new FlxUIButton(20, 20, "Add Image", loadImage);
         add(loadButton);
 
         // =========================
@@ -69,7 +69,7 @@ class PlayState extends FlxState
         // =========================
         // Frequency
         // =========================
-        freqText = new FlxText(20, 130, 300, "Frequency: 10");
+        freqText = new FlxText(20, 130, 300, "Frequency: 5");
         add(freqText);
 
         var freqSlider = new FlxUISlider(this, "setFrequency", 20, 150, 1.0, 50.0, 250, 20);
@@ -96,15 +96,15 @@ class PlayState extends FlxState
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
-        var Update:Float = 0.0;
 
         // =========================
         // Atualização contínua do shader
         // =========================
-        Update += elapsed;
+        shader.uTime.value[0] += elapsed;
 
         // Evita overflow
-        shader.uTime = Update;
+        if (shader.uTime.value[0] > 999999)
+            shader.uTime.value[0] = 0;
 
         // Atualiza texto visual
         timeText.text = "uTime: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
