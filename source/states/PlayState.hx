@@ -36,17 +36,11 @@ class PlayState extends FlxState
     {
         super.create();
 
-        // =========================
-        // Default background
-        // =========================
         bg = new FlxSprite();
         bg.loadGraphic("assets/images/bg/cheeseburger.png");
-        bg.screenCenter();
+        fitImageToScreen();
         add(bg);
 
-        // =========================
-        // Shader
-        // =========================
         shader = new CustomWaveShader();
         shader.uTime.value = [0.0];
         shader.uSpeed.value = [speed];
@@ -56,16 +50,10 @@ class PlayState extends FlxState
 
         bg.shader = shader;
 
-        // =========================
-        // Load image button
-        // =========================
         var loadBtn = new FlxButton(20, 20, "Add Image", loadImage);
         add(loadBtn);
         uiElements.push(loadBtn);
 
-        // =========================
-        // Wave Amplitude
-        // =========================
         ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
         uiElements.push(ampText);
@@ -86,9 +74,6 @@ class PlayState extends FlxState
         add(ampPlus);
         uiElements.push(ampPlus);
 
-        // =========================
-        // Frequency
-        // =========================
         freqText = new FlxText(20, 140, 400, "Frequency: " + frequency);
         add(freqText);
         uiElements.push(freqText);
@@ -109,9 +94,6 @@ class PlayState extends FlxState
         add(freqPlus);
         uiElements.push(freqPlus);
 
-        // =========================
-        // Speed
-        // =========================
         speedText = new FlxText(20, 210, 400, "Speed: " + speed);
         add(speedText);
         uiElements.push(speedText);
@@ -132,14 +114,11 @@ class PlayState extends FlxState
         add(speedPlus);
         uiElements.push(speedPlus);
 
-        // =========================
-        // uTime
-        // =========================
         timeText = new FlxText(20, 280, 400, "uTime: 0");
         add(timeText);
         uiElements.push(timeText);
 
-        var toggleText:FlxText = new FlxText(20, FlxG.height - 30, 400, "Press SPACE to hide/show UI");
+        var toggleText:FlxText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to hide/show UI");
         toggleText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
         add(toggleText);
         uiElements.push(toggleText);
@@ -149,7 +128,6 @@ class PlayState extends FlxState
     {
         super.update(elapsed);
 
-        // Update shader time
         shader.uTime.value[0] += elapsed;
 
         if (shader.uTime.value[0] > 999999)
@@ -157,9 +135,6 @@ class PlayState extends FlxState
 
         timeText.text = "uTime: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
 
-        // =========================
-        // Toggle UI with SPACE
-        // =========================
         if (FlxG.keys.justPressed.SPACE)
         {
             uiVisible = !uiVisible;
@@ -183,9 +158,29 @@ class PlayState extends FlxState
         speedText.text = "Speed: " + speed;
     }
 
-    // =========================
-    // Load custom image
-    // =========================
+    function fitImageToScreen():Void
+    {
+        if (bg == null || bg.graphic == null) return;
+
+        bg.scale.set(1, 1);
+        bg.updateHitbox();
+
+        var screenW:Float = FlxG.width;
+        var screenH:Float = FlxG.height;
+
+        var imageW:Float = bg.width;
+        var imageH:Float = bg.height;
+
+        var scaleX:Float = screenW / imageW;
+        var scaleY:Float = screenH / imageH;
+
+        var finalScale:Float = Math.max(scaleX, scaleY);
+
+        bg.scale.set(finalScale, finalScale);
+        bg.updateHitbox();
+        bg.screenCenter();
+    }
+
     function loadImage():Void
     {
         fileRef = new FileReference();
@@ -211,7 +206,7 @@ class PlayState extends FlxState
             var bmpData:BitmapData = bmp.bitmapData;
 
             bg.loadGraphic(bmpData);
-            bg.screenCenter();
+            fitImageToScreen();
             bg.shader = shader;
         });
 
@@ -219,9 +214,6 @@ class PlayState extends FlxState
     }
 }
 
-// =========================
-// Shader
-// =========================
 class CustomWaveShader extends FlxShader
 {
     @:glFragmentSource('
