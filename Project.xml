@@ -7,5 +7,4 @@
     <assets path="assets" rename="assets" />
     <haxelib name="openfl" />
     <haxelib name="flixel" />
-    <icon path="assets/images/icon.png" />
 </project>
