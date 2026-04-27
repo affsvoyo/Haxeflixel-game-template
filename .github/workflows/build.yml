@@ -37,3 +37,37 @@ jobs:
         with:
           name: Strident-Crisis-Shader-generator
           path: export/windows/bin/
+
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Libraries
+        run: |
+          haxelib install lime
+          haxelib install openfl
+          haxelib install flixel
+          haxelib install flixel-tools
+
+      - name: Run Lime Setup
+        run: |
+          haxelib run lime setup
+
+      - name: Build Project
+        run: |
+          haxelib run lime build linux
+
+      - name: Upload Public Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Strident-Crisis-Shader-generator
+          path: export/windows/bin/
+          
