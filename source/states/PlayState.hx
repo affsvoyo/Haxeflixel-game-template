@@ -259,27 +259,23 @@ class PlayState extends FlxState
     }
 
     function closeGame():Void
-    function closeGame():Void
 {
     var window:Window = Application.current.window;
 
-    FlxTween.num(
-        1,
-        0.1,
-        0.4,
+    FlxTween.tween(window, {
+        width: 100,
+        height: 60
+    }, 0.4, {
+        ease: FlxEase.quadIn,
+        onComplete: function(_)
         {
-            ease: FlxEase.quadIn,
-            onUpdate: function(scale:Float)
-            {
-                window.width = Std.int(1280 * scale);
-                window.height = Std.int(720 * scale);
-            },
-            onComplete: function(_)
-            {
-                Sys.exit(0);
-            }
+            #if sys
+            Sys.exit(0);
+            #else
+            Lib.close();
+            #end
         }
-    );
+    });
 }
 
     function checkForUpdates():Void
