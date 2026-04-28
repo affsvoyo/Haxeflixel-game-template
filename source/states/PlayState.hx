@@ -15,6 +15,9 @@ import openfl.display.BitmapData;
 
 import states.CustomWaveShader;
 
+import sys.io.File;
+import sys.FileSystem;
+
 class PlayState extends FlxState
 {
     var bg:FlxSprite;
@@ -29,6 +32,9 @@ class PlayState extends FlxState
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
+    var effectType:Int = 0;
+
+    var defaultImage:String = "assets/images/bg/default.png";
 
     var uiVisible:Bool = true;
     var uiElements:Array<Dynamic> = [];
@@ -37,8 +43,10 @@ class PlayState extends FlxState
     {
         super.create();
 
+        loadSettings();
+
         bg = new FlxSprite();
-        bg.loadGraphic("assets/images/bg/cheeseburger.png");
+        bg.loadGraphic(defaultImage);
         fitImageToScreen();
         add(bg);
 
@@ -48,7 +56,7 @@ class PlayState extends FlxState
         shader.uSpeed.value = [speed];
         shader.uFrequency.value = [frequency];
         shader.uWaveAmplitude.value = [waveAmplitude];
-        shader.effectType.value = [0];
+        shader.effectType.value = [effectType];
 
         bg.shader = shader;
 
@@ -124,6 +132,15 @@ class PlayState extends FlxState
         toggleText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
         add(toggleText);
         uiElements.push(toggleText);
+
+        if (!uiVisible)
+        {
+            for (element in uiElements)
+            {
+                element.visible = false;
+                element.active = false;
+            }
+        }
     }
 
     override public function update(elapsed:Float):Void
@@ -149,6 +166,45 @@ class PlayState extends FlxState
         }
     }
 
+    function loadSettings():Void
+    {
+        var path = "assets/data/settings.txt";
+
+        if (!FileSystem.exists(path))
+            return;
+
+        var lines = File.getContent(path).split("\n");
+
+        for (line in lines)
+        {
+            var parts = line.split("=");
+
+            if (parts.length < 2)
+                continue;
+
+            switch(parts[0])
+            {
+                case "waveAmplitude":
+                    waveAmplitude = Std.parseFloat(parts[1]);
+
+                case "frequency":
+                    frequency = Std.parseFloat(parts[1]);
+
+                case "speed":
+                    speed = Std.parseFloat(parts[1]);
+
+                case "effectType":
+                    effectType = Std.parseInt(parts[1]);
+
+                case "defaultImage":
+                    defaultImage = parts[1];
+
+                case "uiVisible":
+                    uiVisible = (parts[1] == "true");
+            }
+        }
+    }
+
     function updateShaderValues():Void
     {
         shader.uWaveAmplitude.value = [waveAmplitude];
@@ -162,7 +218,8 @@ class PlayState extends FlxState
 
     function fitImageToScreen():Void
     {
-        if (bg == null || bg.graphic == null) return;
+        if (bg == null || bg.graphic == null)
+            return;
 
         bg.scale.set(1, 1);
         bg.updateHitbox();
@@ -187,6 +244,7 @@ class PlayState extends FlxState
     {
         fileRef = new FileReference();
         fileRef.addEventListener(Event.SELECT, onFileSelected);
+
         fileRef.browse([
             new FileFilter("Images", "*.png;*.jpg;*.jpeg")
         ]);
