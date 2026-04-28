@@ -34,7 +34,7 @@ class PlayState extends FlxState
     var speed:Float = 2.0;
     var effectType:Int = 0;
 
-    var defaultImage:String = "assets/images/bg/default.png";
+    var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
     var uiVisible:Bool = true;
     var uiElements:Array<Dynamic> = [];
@@ -195,9 +195,6 @@ class PlayState extends FlxState
 
                 case "effectType":
                     effectType = Std.parseInt(parts[1]);
-
-                case "defaultImage":
-                    defaultImage = parts[1];
 
                 case "uiVisible":
                     uiVisible = (parts[1] == "true");
