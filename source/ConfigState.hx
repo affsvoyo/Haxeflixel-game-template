@@ -1,10 +1,11 @@
-package;
+package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import states.PlayState;
+
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -15,13 +16,11 @@ class ConfigState extends FlxState
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
-    var effectType:Int = 0;
     var uiVisible:Bool = true;
 
     var ampText:FlxText;
     var freqText:FlxText;
     var speedText:FlxText;
-    var effectText:FlxText;
 
     override public function create():Void
     {
@@ -76,35 +75,25 @@ class ConfigState extends FlxState
             updateTexts();
         }));
 
-        effectText = new FlxText(20, 270, 400, "Effect Type: " + effectType);
-        add(effectText);
+        add(new FlxButton(20, 320, "Save Settings", saveSettings));
+        add(new FlxButton(180, 320, "Finish Setup", completeSetup));
 
-        add(new FlxButton(20, 300, "Effect +", function()
+        add(new FlxButton(20, 370, "Reset First Boot", function()
         {
-            effectType++;
-            updateTexts();
+            var bootPath:String = "assets/data/firstboot.txt";
+
+            #if sys
+            if (FileSystem.exists(bootPath))
+                FileSystem.deleteFile(bootPath);
+            #end
         }));
+    }
 
-        add(new FlxButton(140, 300, "Effect -", function()
-        {
-htton(20, 370, "Save Settings", saveSettings));
-        add(new FlxButton(180, 370, "Finish Setup", completeSetup));
-
-        add(new FlxButton(20, 420, "Reset First Boot", function()
-{
-    var bootPath:String = "assets/data/firstboot.txt";
-
-    #if sys
-    if (FileSystem.exists(bootPath))
-        FileSystem.deleteFile(bootPath);
-    #end
-}));
     function updateTexts():Void
     {
         ampText.text = "Wave Amplitude: " + waveAmplitude;
         freqText.text = "Frequency: " + frequency;
         speedText.text = "Speed: " + speed;
-        effectText.text = "Effect Type: " + effectType;
     }
 
     function saveSettings():Void
@@ -113,20 +102,21 @@ htton(20, 370, "Save Settings", saveSettings));
             "waveAmplitude=" + waveAmplitude + "\n" +
             "frequency=" + frequency + "\n" +
             "speed=" + speed + "\n" +
-            "effectType=" + effectType + "\n" +
+            "defaultImage=assets/images/bg/default.png\n" +
             "uiVisible=" + uiVisible;
 
+        #if sys
         File.saveContent("assets/data/settings.txt", content);
+        #end
     }
 
     function completeSetup():Void
     {
         saveSettings();
 
-        File.saveContent(
-            "assets/data/firstboot.txt",
-            "configured=true"
-        );
+        #if sys
+        File.saveContent("assets/data/firstboot.txt", "configured=true");
+        #end
 
         FlxG.switchState(new PlayState());
     }
