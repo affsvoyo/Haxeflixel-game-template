@@ -142,36 +142,3 @@ jobs:
         with:
           name: Strident-Crisis-Shader-generator-neko
           path: export/neko/bin/
-
-  mac:
-    runs-on: macos-13
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Haxe
-        uses: krdlab/setup-haxe@v1
-        with:
-          haxe-version: 4.2.5
-
-      - name: Install Libraries
-        run: |
-          haxelib install lime --quiet
-          haxelib install openfl --quiet
-          haxelib install flixel --quiet
-          haxelib install flixel-tools --quiet
-
-      - name: Run Lime Setup
-        run: |
-          haxelib run lime setup
-
-      - name: Build macOS
-        run: |
-          haxelib run lime build mac
-
-      - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Strident-Crisis-Shader-generator-mac
-          path: export/mac/bin/
