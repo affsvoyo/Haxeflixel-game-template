@@ -2,8 +2,6 @@ package;
 
 import openfl.display.Sprite;
 import flixel.FlxGame;
-import flixel.FlxG;
-import flixel.text.FlxText;
 
 import states.PlayState;
 import ConfigState;
@@ -15,12 +13,11 @@ import sys.io.File;
 
 class Main extends Sprite
 {
+    public static var GLOBAL_FONT:String = "assets/fonts/vcr.ttf";
+
     public function new()
     {
         super();
-
-        // Define a fonte padrão global para todos os FlxText
-        FlxText.defaultFont = "assets/fonts/vcr.ttf";
 
         var firstState:Class<flixel.FlxState> = ConfigState;
 
