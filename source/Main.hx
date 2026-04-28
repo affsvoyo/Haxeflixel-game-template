@@ -2,11 +2,13 @@ package;
 
 import openfl.display.Sprite;
 import flixel.FlxGame;
+
 import states.PlayState;
 import ConfigState;
+
 #if sys
-import sys.io.File;
 import sys.FileSystem;
+import sys.io.File;
 #end
 
 class Main extends Sprite
@@ -15,19 +17,22 @@ class Main extends Sprite
     {
         super();
 
-        var firstState:Class<Dynamic>;
+        var firstState:Class<flixel.FlxState> = ConfigState;
+
+        #if sys
         var bootPath = "assets/data/firstboot.txt";
 
-        if (!FileSystem.exists(bootPath))
+        if (FileSystem.exists(bootPath))
         {
-            firstState = ConfigState;
-        }
-        else
-        {
-            var content = File.getContent(bootPath);
-            firstState = (content.indexOf("configured=true") != -1) ? PlayState : ConfigState;
-        }
+            var content:String = File.getContent(bootPath);
 
-        addChild(new FlxGame(1280, 720, firstState));
+            if (content.indexOf("configured=true") != -1)
+                firstState = PlayState;
+        }
+        #else
+        firstState = ConfigState;
+        #end
+
+        addChild(new FlxGame(0, 0, firstState));
     }
 }
