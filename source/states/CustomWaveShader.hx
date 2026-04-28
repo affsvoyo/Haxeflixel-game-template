@@ -5,9 +5,11 @@ import openfl.Assets;
 
 class CustomWaveShader extends FlxShader
 {
-    @:glFragmentSource(Assets.getText("assets/data/shader/Wavy.frag"))
     public function new()
     {
         super();
+
+        var frag:String = Assets.getText("assets/data/shader/Wavy.frag");
+        this.glFragmentSource = frag;
     }
 }
