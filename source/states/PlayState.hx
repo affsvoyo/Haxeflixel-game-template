@@ -12,6 +12,10 @@ import openfl.net.FileFilter;
 import openfl.display.Loader;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.net.URLRequest;
+import openfl.net.navigateToURL;
+
+import haxe.Http;
 
 import states.CustomWaveShader;
 
@@ -30,6 +34,8 @@ class PlayState extends FlxState
     var freqText:FlxText;
     var speedText:FlxText;
     var timeText:FlxText;
+    var versionText:FlxText;
+    var updatePrompt:FlxText;
 
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
@@ -39,6 +45,10 @@ class PlayState extends FlxState
     var uiElements:Array<Dynamic> = [];
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
+
+    var currentVersion:String = "1.0.0";
+    var latestVersion:String = "";
+    var updateAvailable:Bool = false;
 
     override public function create():Void
     {
@@ -59,6 +69,22 @@ class PlayState extends FlxState
         shader.uWaveAmplitude.value = [waveAmplitude];
 
         bg.shader = shader;
+
+        checkForUpdates();
+
+        versionText = new FlxText(10, FlxG.height - 50, 500, "Version: " + currentVersion);
+        versionText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
+        add(versionText);
+
+        updatePrompt = new FlxText(
+            FlxG.width / 2 - 300,
+            FlxG.height / 2 - 40,
+            600,
+            ""
+        );
+        updatePrompt.setFormat(null, 20, 0xFFFFFFFF, CENTER);
+        updatePrompt.visible = false;
+        add(updatePrompt);
 
         var loadBtn = new FlxButton(20, 20, "Add Image", loadImage);
         add(loadBtn);
@@ -128,7 +154,12 @@ class PlayState extends FlxState
         add(timeText);
         uiElements.push(timeText);
 
-        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to hide/show UI");
+        var toggleText = new FlxText(
+            20,
+            FlxG.height - 30,
+            500,
+            "Press SPACE to hide/show UI"
+        );
         toggleText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
         add(toggleText);
         uiElements.push(toggleText);
@@ -143,7 +174,9 @@ class PlayState extends FlxState
         if (shader.uTime.value[0] > 999999)
             shader.uTime.value[0] = 0;
 
-        timeText.text = "uTime: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
+        timeText.text = "uTime: " + Std.string(
+            Std.int(shader.uTime.value[0] * 100) / 100
+        );
 
         if (FlxG.keys.justPressed.SPACE)
         {
@@ -155,6 +188,59 @@ class PlayState extends FlxState
                 element.active = uiVisible;
             }
         }
+
+        if (updateAvailable)
+        {
+            if (FlxG.keys.justPressed.ENTER)
+            {
+                navigateToURL(
+                    new URLRequest(
+                        "https://github.com/affsvoyo/Strident-Crisis-Shader-Generator/releases/latest"
+                    ),
+                    "_blank"
+                );
+
+                updatePrompt.visible = false;
+                updateAvailable = false;
+            }
+
+            if (FlxG.keys.justPressed.ESCAPE)
+            {
+                updatePrompt.visible = false;
+                updateAvailable = false;
+            }
+        }
+    }
+
+    function checkForUpdates():Void
+    {
+        var versionURL = "https://raw.githubusercontent.com/affsvoyo/Strident-Crisis-Shader-Generator/main/Version.md";
+
+        var http = new Http(versionURL);
+
+        http.onData = function(data:String)
+        {
+            latestVersion = StringTools.trim(data);
+
+            if (latestVersion != currentVersion)
+            {
+                updateAvailable = true;
+
+                updatePrompt.text =
+                    "New Version Available: " + latestVersion +
+                    "\nPress ENTER to download update" +
+                    "\nPress ESC to ignore";
+
+                updatePrompt.visible = true;
+            }
+        };
+
+        http.onError = function(error:String)
+        {
+            trace("Version check failed: " + error);
+        };
+
+        http.request();
     }
 
     function loadSettings():Void
@@ -221,6 +307,7 @@ class PlayState extends FlxState
     function loadImage():Void
     {
         fileRef = new FileReference();
+
         fileRef.addEventListener(Event.SELECT, onFileSelected);
 
         fileRef.browse([
@@ -238,14 +325,18 @@ class PlayState extends FlxState
     {
         var loader = new Loader();
 
-        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
-        {
-            var bmp:Bitmap = cast loader.content;
-            bg.loadGraphic(bmp.bitmapData);
+        loader.contentLoaderInfo.addEventListener(
+            Event.COMPLETE,
+            function(_)
+            {
+                var bmp:Bitmap = cast loader.content;
 
-            fitImageToScreen();
-            bg.shader = shader;
-        });
+                bg.loadGraphic(bmp.bitmapData);
+
+                fitImageToScreen();
+                bg.shader = shader;
+            }
+        );
 
         loader.loadBytes(fileRef.data);
     }
