@@ -44,6 +44,12 @@ jobs:
           name: Strident-Crisis-Shader-generator-windows
           path: export/windows/bin/
 
+      - name: Upload Windows EXE Only
+        uses: actions/upload-artifact@v4
+        with:
+          name: Strident-Crisis-Shader-generator-exe
+          path: export/windows/bin/*.exe
+
   linux:
     runs-on: ubuntu-latest
 
