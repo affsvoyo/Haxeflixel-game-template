@@ -193,12 +193,12 @@ class PlayState extends FlxState
         {
             if (FlxG.keys.justPressed.ENTER)
             {
-                navigateToURL(
-                    new URLRequest(
-                        "https://github.com/affsvoyo/Strident-Crisis-Shader-Generator/releases/latest"
-                    ),
-                    "_blank"
-                );
+                Lib.getURL(
+    new URLRequest(
+        "https://github.com/affsvoyo/Strident-Crisis-Shader-Generator/releases/latest"
+    ),
+    "_blank"
+);
 
                 updatePrompt.visible = false;
                 updateAvailable = false;
