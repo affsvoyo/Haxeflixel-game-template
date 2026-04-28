@@ -62,9 +62,6 @@ class PlayState extends FlxState
         super.create();
 
         loadSettings();
-
-        clickSound = Sound.fromFile("assets/sounds/click.ogg");
-
         bg = new FlxSprite();
         bg.loadGraphic(defaultImage);
         fitImageToScreen();
@@ -251,13 +248,9 @@ class PlayState extends FlxState
     }
 
     function playClick():Void
-    {
-        if (clickSound != null)
-        {
-            clickSound.play();
-        }
-    }
-
+{
+    FlxG.sound.play("assets/sounds/click.ogg");
+}
     function closeGame():Void
 {
     var window:Window = Application.current.window;
