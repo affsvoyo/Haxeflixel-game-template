@@ -15,8 +15,10 @@ import openfl.display.BitmapData;
 
 import states.CustomWaveShader;
 
+#if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 
 class PlayState extends FlxState
 {
