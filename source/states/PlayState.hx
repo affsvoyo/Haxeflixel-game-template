@@ -34,12 +34,11 @@ class PlayState extends FlxState
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
-    var effectType:Int = 0;
-
-    var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
     var uiVisible:Bool = true;
     var uiElements:Array<Dynamic> = [];
+
+    var defaultImage:String = "assets/images/bg/cheeseburger.png";
 
     override public function create():Void
     {
@@ -58,7 +57,7 @@ class PlayState extends FlxState
         shader.uSpeed.value = [speed];
         shader.uFrequency.value = [frequency];
         shader.uWaveAmplitude.value = [waveAmplitude];
-        shader.effectType.value = [effectType];
+        shader.effectType.value = [0];
 
         bg.shader = shader;
 
@@ -130,19 +129,10 @@ class PlayState extends FlxState
         add(timeText);
         uiElements.push(timeText);
 
-        var toggleText:FlxText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to hide/show UI");
+        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to hide/show UI");
         toggleText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
         add(toggleText);
         uiElements.push(toggleText);
-
-        if (!uiVisible)
-        {
-            for (element in uiElements)
-            {
-                element.visible = false;
-                element.active = false;
-            }
-        }
     }
 
     override public function update(elapsed:Float):Void
@@ -173,15 +163,10 @@ class PlayState extends FlxState
         var path = "assets/data/settings.txt";
 
         #if sys
-if (!sys.FileSystem.exists(path))
-    return;
+        if (!FileSystem.exists(path))
+            return;
 
-var lines:Array<String> = sys.io.File.getContent(path).split("\n");
-#else
-return;
-#end
-
-        var lines = File.getContent(path).split("\n");
+        var lines:Array<String> = File.getContent(path).split("\n");
 
         for (line in lines)
         {
@@ -200,14 +185,9 @@ return;
 
                 case "speed":
                     speed = Std.parseFloat(parts[1]);
-
-                case "effectType":
-                    effectType = Std.parseInt(parts[1]);
-
-                case "uiVisible":
-                    uiVisible = (parts[1] == "true");
             }
         }
+        #end
     }
 
     function updateShaderValues():Void
@@ -229,14 +209,8 @@ return;
         bg.scale.set(1, 1);
         bg.updateHitbox();
 
-        var screenW:Float = FlxG.width;
-        var screenH:Float = FlxG.height;
-
-        var imageW:Float = bg.width;
-        var imageH:Float = bg.height;
-
-        var scaleX:Float = screenW / imageW;
-        var scaleY:Float = screenH / imageH;
+        var scaleX:Float = FlxG.width / bg.width;
+        var scaleY:Float = FlxG.height / bg.height;
 
         var finalScale:Float = Math.max(scaleX, scaleY);
 
@@ -268,13 +242,12 @@ return;
         loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
         {
             var bmp:Bitmap = cast loader.content;
-            var bmpData:BitmapData = bmp.bitmapData;
+            bg.loadGraphic(bmp.bitmapData);
 
-            bg.loadGraphic(bmpData);
             fitImageToScreen();
             bg.shader = shader;
         });
 
         loader.loadBytes(fileRef.data);
     }
-}
+            }
