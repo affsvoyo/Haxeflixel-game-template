@@ -130,6 +130,14 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_ROOT
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
+
+      - name: Force GCC/G++ for HXCPP
+        run: |
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+          echo "HXCPP_CLANG=0" >> $GITHUB_ENV
+          echo "HXCPP_CPP11=1" >> $GITHUB_ENV
+          echo "HXCPP_CONFIG=linux-gcc" >> $GITHUB_ENV
           
       - name: Build Android APK
         env:
