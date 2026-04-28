@@ -4,6 +4,7 @@ import flixel.FlxState;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import states.PlayState;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -86,22 +87,18 @@ class ConfigState extends FlxState
 
         add(new FlxButton(140, 300, "Effect -", function()
         {
-            effectType = Math.max(0, effectType - 1);
-            updateTexts();
-        }));
-
-        add(new FlxButton(20, 370, "Save Settings", saveSettings));
+htton(20, 370, "Save Settings", saveSettings));
         add(new FlxButton(180, 370, "Finish Setup", completeSetup));
 
         add(new FlxButton(20, 420, "Reset First Boot", function()
-        {
-            var bootPath = "assets/data/firstboot.txt";
+{
+    var bootPath:String = "assets/data/firstboot.txt";
 
-            if (FileSystem.exists(bootPath))
-                FileSystem.deleteFile(bootPath);
-        }));
-    }
-
+    #if sys
+    if (FileSystem.exists(bootPath))
+        FileSystem.deleteFile(bootPath);
+    #end
+}));
     function updateTexts():Void
     {
         ampText.text = "Wave Amplitude: " + waveAmplitude;
