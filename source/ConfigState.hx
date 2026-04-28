@@ -102,7 +102,6 @@ class ConfigState extends FlxState
             "waveAmplitude=" + waveAmplitude + "\n" +
             "frequency=" + frequency + "\n" +
             "speed=" + speed + "\n" +
-            "defaultImage=assets/images/bg/default.png\n" +
             "uiVisible=" + uiVisible;
 
         #if sys
