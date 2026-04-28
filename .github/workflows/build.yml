@@ -95,6 +95,7 @@ jobs:
           haxelib install openfl --quiet
           haxelib install flixel --quiet
           haxelib install flixel-tools --quiet
+          haxelib install hxcpp --quiet
 
       - name: Setup Java
         uses: actions/setup-java@v4
