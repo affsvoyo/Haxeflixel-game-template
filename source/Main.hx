@@ -3,7 +3,7 @@ package;
 import openfl.display.Sprite;
 import flixel.FlxGame;
 import flixel.FlxG;
-import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.text.FlxText;
 
 import states.PlayState;
 import ConfigState;
@@ -19,9 +19,8 @@ class Main extends Sprite
     {
         super();
 
-        // Define fonte global padrão
-        FlxG.save.bind("globalFont", "Generator");
-        FlxG.bitmap.defaultFont = "assets/fonts/vcr.ttf";
+        // Define a fonte padrão global para todos os FlxText
+        FlxText.defaultFont = "assets/fonts/vcr.ttf";
 
         var firstState:Class<flixel.FlxState> = ConfigState;
 
@@ -41,4 +40,4 @@ class Main extends Sprite
 
         addChild(new FlxGame(0, 0, firstState));
     }
-} 
+}
