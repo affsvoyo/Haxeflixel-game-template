@@ -23,9 +23,7 @@ import lime.ui.Window;
 import haxe.Http;
 
 import states.CustomWaveShader;
-#if android
-import extension.androidtools.permissions.Permissions;
-#end
+
     
 #if sys
 import sys.io.File;
