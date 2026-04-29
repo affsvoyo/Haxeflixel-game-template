@@ -42,11 +42,12 @@ class PlayState extends FlxState
     var versionText:FlxText;
     var updatePrompt:FlxText;
 
-    var clickSound:Sound;
-
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
+    var brightness:Float = 1.0;
+
+    var brightnessOverlay:FlxSprite;
 
     var uiVisible:Bool = true;
     var uiElements:Array<Dynamic> = [];
@@ -62,6 +63,7 @@ class PlayState extends FlxState
         super.create();
 
         loadSettings();
+
         bg = new FlxSprite();
         bg.loadGraphic(defaultImage);
         fitImageToScreen();
@@ -76,19 +78,17 @@ class PlayState extends FlxState
 
         bg.shader = shader;
 
+        brightnessOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+        brightnessOverlay.scrollFactor.set();
+        add(brightnessOverlay);
+
         checkForUpdates();
 
         versionText = new FlxText(10, FlxG.height - 50, 500, "Version: " + currentVersion);
-        versionText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
         add(versionText);
+        uiElements.push(versionText);
 
-        updatePrompt = new FlxText(
-            FlxG.width / 2 - 300,
-            FlxG.height / 2 - 40,
-            600,
-            ""
-        );
-        updatePrompt.setFormat(null, 20, 0xFFFFFFFF, CENTER);
+        updatePrompt = new FlxText(FlxG.width / 2 - 300, FlxG.height / 2 - 40, 600, "");
         updatePrompt.visible = false;
         add(updatePrompt);
 
@@ -108,13 +108,20 @@ class PlayState extends FlxState
         add(exitBtn);
         uiElements.push(exitBtn);
 
+        var resetBtn = new FlxButton(20, FlxG.height - 80, "Reset", function()
+        {
+            playClick();
+            resetDefaults();
+        });
+        add(resetBtn);
+        uiElements.push(resetBtn);
+
         ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
         uiElements.push(ampText);
 
         var ampMinus = new FlxButton(20, 95, "-", function()
         {
-            playClick();
             waveAmplitude = Math.max(0, waveAmplitude - 0.005);
             updateShaderValues();
         });
@@ -123,7 +130,6 @@ class PlayState extends FlxState
 
         var ampPlus = new FlxButton(120, 95, "+", function()
         {
-            playClick();
             waveAmplitude += 0.005;
             updateShaderValues();
         });
@@ -136,7 +142,6 @@ class PlayState extends FlxState
 
         var freqMinus = new FlxButton(20, 165, "-", function()
         {
-            playClick();
             frequency = Math.max(1, frequency - 1);
             updateShaderValues();
         });
@@ -145,7 +150,6 @@ class PlayState extends FlxState
 
         var freqPlus = new FlxButton(120, 165, "+", function()
         {
-            playClick();
             frequency += 1;
             updateShaderValues();
         });
@@ -158,7 +162,6 @@ class PlayState extends FlxState
 
         var speedMinus = new FlxButton(20, 235, "-", function()
         {
-            playClick();
             speed = Math.max(0.1, speed - 0.1);
             updateShaderValues();
         });
@@ -167,26 +170,35 @@ class PlayState extends FlxState
 
         var speedPlus = new FlxButton(120, 235, "+", function()
         {
-            playClick();
             speed += 0.1;
             updateShaderValues();
         });
         add(speedPlus);
         uiElements.push(speedPlus);
 
-        timeText = new FlxText(20, 280, 400, "uTime: 0");
-        add(timeText);
-        uiElements.push(timeText);
+        var brightMinus = new FlxButton(20, 300, "-", function()
+        {
+            brightness = Math.max(0, brightness - 0.1);
+            updateBrightness();
+        });
+        add(brightMinus);
+        uiElements.push(brightMinus);
 
-        var toggleText = new FlxText(
-            20,
-            FlxG.height - 30,
-            500,
-            "Press SPACE to hide/show UI"
-        );
-        toggleText.setFormat(null, 16, 0xFFFFFFFF, LEFT);
+        var brightPlus = new FlxButton(120, 300, "+", function()
+        {
+            brightness = Math.min(1, brightness + 0.1);
+            updateBrightness();
+        });
+        add(brightPlus);
+        uiElements.push(brightPlus);
+
+        timeText = new FlxText(20, 330, 400, "Time: 0");
+        add(timeText);
+
+        var toggleText = new FlxText(20, FlxG.height - 30, 500, "Press SPACE to toggle UI");
         add(toggleText);
-        uiElements.push(toggleText);
+
+        updateBrightness();
     }
 
     override public function update(elapsed:Float):Void
@@ -195,130 +207,34 @@ class PlayState extends FlxState
 
         shader.uTime.value[0] += elapsed;
 
-        if (shader.uTime.value[0] > 999999)
-            shader.uTime.value[0] = 0;
-
-        timeText.text = "uTime: " + Std.string(
-            Std.int(shader.uTime.value[0] * 100) / 100
-        );
-
-        if (FlxG.mouse.justPressed)
-        {
-            playClick();
-        }
+        timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
 
         if (FlxG.keys.justPressed.SPACE)
         {
-            playClick();
-
             uiVisible = !uiVisible;
 
-            for (element in uiElements)
+            for (e in uiElements)
             {
-                element.visible = uiVisible;
-                element.active = uiVisible;
-            }
-        }
-
-        if (updateAvailable)
-        {
-            if (FlxG.keys.justPressed.ENTER)
-            {
-                playClick();
-            }
-
-            if (FlxG.keys.justPressed.ESCAPE)
-            {
-                playClick();
+                e.visible = uiVisible;
+                e.active = uiVisible;
             }
         }
     }
 
-    function playClick():Void
-{
-    FlxG.sound.play("assets/sounds/click.ogg");
-}
-    function closeGame():Void
-{
-    var window:Window = Application.current.window;
-
-    FlxTween.tween(window, {
-        width: 100,
-        height: 60
-    }, 0.4, {
-        ease: FlxEase.quadIn,
-        onComplete: function(_)
-        {
-            #if sys
-            Sys.exit(0);
-            #else
-            Lib.close();
-            #end
-        }
-    });
-}
-
-    function checkForUpdates():Void
+    function resetDefaults():Void
     {
-        var versionURL = "https://raw.githubusercontent.com/affsvoyo/Strident-Crisis-Shader-Generator/main/Version.md";
+        waveAmplitude = 0.1;
+        frequency = 5.0;
+        speed = 2.0;
+        brightness = 1.0;
 
-        var http = new Http(versionURL);
-
-        http.onData = function(data:String)
-        {
-            latestVersion = StringTools.trim(data);
-
-            if (latestVersion != currentVersion)
-            {
-                updateAvailable = true;
-
-                updatePrompt.text =
-                    "New Version Available: " + latestVersion +
-                    "\nPress ENTER to download update" +
-                    "\nPress ESC to ignore";
-
-                updatePrompt.visible = true;
-            }
-        };
-
-        http.onError = function(error:String)
-        {
-            trace("Version check failed: " + error);
-        };
-
-        http.request();
+        updateShaderValues();
+        updateBrightness();
     }
 
-    function loadSettings():Void
+    function updateBrightness():Void
     {
-        var path = "assets/data/settings.txt";
-
-        #if sys
-        if (!FileSystem.exists(path))
-            return;
-
-        var lines:Array<String> = File.getContent(path).split("\n");
-
-        for (line in lines)
-        {
-            var parts = line.split("=");
-
-            if (parts.length < 2)
-                continue;
-
-            switch(parts[0])
-            {
-                case "waveAmplitude":
-                    waveAmplitude = Std.parseFloat(parts[1]);
-
-                case "frequency":
-                    frequency = Std.parseFloat(parts[1]);
-
-                case "speed":
-                    speed = Std.parseFloat(parts[1]);
-            }
-        }
-        #end
+        brightnessOverlay.alpha = 1 - brightness;
     }
 
     function updateShaderValues():Void
@@ -332,18 +248,68 @@ class PlayState extends FlxState
         speedText.text = "Speed: " + speed;
     }
 
+    function playClick():Void
+    {
+        FlxG.sound.play("assets/sounds/click.ogg");
+    }
+
+    function closeGame():Void
+    {
+        var window:Window = Application.current.window;
+
+        FlxTween.tween(window, {
+            width: 100,
+            height: 60
+        }, 0.4, {
+            ease: FlxEase.quadIn,
+            onComplete: function(_)
+            {
+                #if sys
+                Sys.exit(0);
+                #else
+                Lib.close();
+                #end
+            }
+        });
+    }
+
+    function loadSettings():Void
+    {
+        var path = "assets/data/settings.txt";
+
+        #if sys
+        if (!FileSystem.exists(path))
+            return;
+
+        var lines = File.getContent(path).split("\n");
+
+        for (line in lines)
+        {
+            var parts = line.split("=");
+
+            if (parts.length < 2) continue;
+
+            switch(parts[0])
+            {
+                case "waveAmplitude": waveAmplitude = Std.parseFloat(parts[1]);
+                case "frequency": frequency = Std.parseFloat(parts[1]);
+                case "speed": speed = Std.parseFloat(parts[1]);
+            }
+        }
+        #end
+    }
+
     function fitImageToScreen():Void
     {
-        if (bg == null || bg.graphic == null)
-            return;
+        if (bg == null || bg.graphic == null) return;
 
         bg.scale.set(1, 1);
         bg.updateHitbox();
 
-        var scaleX:Float = FlxG.width / bg.width;
-        var scaleY:Float = FlxG.height / bg.height;
+        var scaleX = FlxG.width / bg.width;
+        var scaleY = FlxG.height / bg.height;
 
-        var finalScale:Float = Math.max(scaleX, scaleY);
+        var finalScale = Math.max(scaleX, scaleY);
 
         bg.scale.set(finalScale, finalScale);
         bg.updateHitbox();
@@ -353,12 +319,8 @@ class PlayState extends FlxState
     function loadImage():Void
     {
         fileRef = new FileReference();
-
         fileRef.addEventListener(Event.SELECT, onFileSelected);
-
-        fileRef.browse([
-            new FileFilter("Images", "*.png;*.jpg;*.jpeg")
-        ]);
+        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
     }
 
     function onFileSelected(e:Event):Void
@@ -371,18 +333,13 @@ class PlayState extends FlxState
     {
         var loader = new Loader();
 
-        loader.contentLoaderInfo.addEventListener(
-            Event.COMPLETE,
-            function(_)
-            {
-                var bmp:Bitmap = cast loader.content;
-
-                bg.loadGraphic(bmp.bitmapData);
-
-                fitImageToScreen();
-                bg.shader = shader;
-            }
-        );
+        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
+        {
+            var bmp:Bitmap = cast loader.content;
+            bg.loadGraphic(bmp.bitmapData);
+            fitImageToScreen();
+            bg.shader = shader;
+        });
 
         loader.loadBytes(fileRef.data);
     }
