@@ -2,6 +2,8 @@ package;
 
 import openfl.display.Sprite;
 import flixel.FlxGame;
+import flixel.FlxG;
+import flixel.addons.transition.FlxTransitionableState;
 
 import states.PlayState;
 import ConfigState;
@@ -18,6 +20,9 @@ class Main extends Sprite
     public function new()
     {
         super();
+
+        FlxTransitionableState.defaultTransIn = true;
+        FlxTransitionableState.defaultTransOut = true;
 
         var firstState:Class<flixel.FlxState> = ConfigState;
 
