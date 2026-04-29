@@ -21,20 +21,44 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 11
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK + Correct NDK
+      - name: Install Android SDK + Compatible NDK
         run: |
           yes | sdkmanager --licenses
           sdkmanager "platform-tools" \
-                     "platforms;android-33" \
-                     "build-tools;33.0.2" \
-                     "ndk;23.2.8568313"
+                     "platforms;android-30" \
+                     "build-tools;30.0.3" \
+                     "ndk;21.4.7075529"
 
-      - name: Install Libraries
+      - name: Install Haxelib Libraries
+        run: |
+          haxelib setup ~/haxelib
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install flixel --quiet
+          haxelib install flixel-tools --quiet
+          haxelib install flixel-addons --quiet
+          haxelib install hxcpp --quiet
+
+      - name: Build Android
+        run: |
+          export ANDROID_SDK=/usr/local/lib/android/sdk
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+          export ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/21.4.7075529
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          haxelib run lime setup android
+          haxelib run lime build android
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Strident-Crisis-Shader-generator-android
+          path: export/android/bin/app/build/outputs/apk/      - name: Install Libraries
         run: |
           haxelib setup ~/haxelib
           haxelib install lime --quiet
