@@ -255,6 +255,7 @@ class PlayState extends FlxState
 
     function closeGame():Void
     {
+        #if desktop
         var window:Window = Application.current.window;
 
         FlxTween.tween(window, {
@@ -272,6 +273,7 @@ class PlayState extends FlxState
             }
         });
     }
+    #end
 
     function loadSettings():Void
     {
