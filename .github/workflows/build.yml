@@ -158,7 +158,7 @@ jobs:
 
       - name: Compile Android
         run: |
-          haxelib run lime build android -release
+          haxelib run lime build android
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
