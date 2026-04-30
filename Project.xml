@@ -8,4 +8,5 @@
     <haxelib name="openfl" />
     <haxelib name="flixel" />
     <haxelib name="hxCodec" />
+    <define name="HXC_LIBVLC_DIR" value="C:\Program Files\VideoLAN\VLC" if="windows" />
 </project>
