@@ -2,12 +2,9 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
-import states.PlayState;
+import hxcodec.flixel.FlxVideo;
 import states.ConfigState;
-
-#if desktop
-import hxcodec.flixel.FlxVideo; 
-#end
+import states.PlayState;
 
 #if sys
 import sys.FileSystem;
@@ -20,26 +17,17 @@ class IntroState extends FlxState
     {
         super.create();
 
-        // Baseado na sintaxe do FlxVideo mostrada no vídeo
-        var video = new FlxVideo("assets/videos/init.mp4");
+        var video = new FlxVideo();
         
-        // Callback que é executado automaticamente assim que o vídeo termina.
-        // É aqui que "depois disso você decide" a lógica do jogo.
-        video.finishCallback = function() 
-        {
+        video.onEndReached.add(function() {
             decideNextState();
-        };
+        });
 
-        // NOTA: Se você instalou o hxCodec (versões recentes), a sintaxe seria levemente diferente:
-        // var video = new FlxVideo();
-        // video.onEndReached.add(function() { decideNextState(); });
-        // video.play("assets/videos/init.mp4");
+        video.play("assets/videos/init.mp4");
     }
 
-    // Movemos a sua função startGame() para cá, adaptada como uma mudança de Estado
     function decideNextState():Void
     {
-        // Estado padrão caso nada seja encontrado
         var nextState:FlxState = new ConfigState();
 
         #if sys
@@ -56,7 +44,6 @@ class IntroState extends FlxState
         }
         #end
 
-        // Troca para o estado decidido (ConfigState ou PlayState)
         FlxG.switchState(nextState);
     }
 }
