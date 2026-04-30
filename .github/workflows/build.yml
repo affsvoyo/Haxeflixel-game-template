@@ -27,9 +27,10 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
-      - name: Run Lime Setup
+      - name: Run Setups
         shell: bash
         run: |
+          haxelib run hxCodec setup
           haxelib run lime setup
 
       - name: Build Windows
@@ -99,8 +100,10 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install flixel-tools --quiet
 
-      - name: Run Lime Setup
+      - name: Run Setups
+        shell: bash
         run: |
+          haxelib run hxCodec setup
           haxelib run lime setup
 
       - name: Build Neko
@@ -156,6 +159,12 @@ jobs:
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
           haxelib install flixel-addons --quiet
+
+      - name: Run Setups
+        shell: bash
+        run: |
+          haxelib run hxCodec setup
+          haxelib run lime setup
 
       - name: Configure Android
         run: |
