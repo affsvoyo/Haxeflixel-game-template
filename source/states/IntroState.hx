@@ -2,14 +2,16 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
+import flixel.util.FlxTimer;
+
+import openfl.media.Video;
+import openfl.net.NetConnection;
+import openfl.net.NetStream;
+import openfl.events.NetStatusEvent;
+import openfl.display.Sprite;
 
 import states.ConfigState;
 import states.PlayState;
-
-import openfl.media.Video;
-import openfl.media.VideoStream;
-import openfl.display.Sprite;
-import openfl.events.Event;
 
 #if sys
 import sys.FileSystem;
@@ -19,6 +21,7 @@ import sys.io.File;
 class IntroState extends FlxState
 {
     var video:Video;
+    var stream:NetStream;
     var container:Sprite;
 
     override public function create()
@@ -28,38 +31,31 @@ class IntroState extends FlxState
         container = new Sprite();
         FlxG.stage.addChild(container);
 
+        var nc = new NetConnection();
+        nc.connect(null);
+
+        stream = new NetStream(nc);
+
         video = new Video();
-        video.x = 0;
-        video.y = 0;
+        video.attachNetStream(stream);
 
         container.addChild(video);
 
-        video.attachNetStream(new VideoStream());
-        video.attachNetStream(null); 
+        stream.client = {};
+        stream.play("assets/videos/init.mp4");
 
-        var url = "assets/videos/init.mp4";
-        video.attachNetStream(new openfl.net.NetStream(new openfl.net.NetConnection()));
-
-        video.addEventListener(Event.COMPLETE, onVideoEnd);
-        FlxG.stage.addEventListener(Event.ENTER_FRAME, checkVideoEnd);
+        stream.addEventListener(NetStatusEvent.NET_STATUS, onStatus);
     }
 
-    function checkVideoEnd(e:Event):Void
+    function onStatus(e:NetStatusEvent):Void
     {
-        if (video == null) return;
-
-        if (video.playing == false)
+        if (e.info.code == "NetStream.Play.Stop")
         {
-            finishVideo();
+            finish();
         }
     }
 
-    function onVideoEnd(e:Event):Void
-    {
-        finishVideo();
-    }
-
-    function finishVideo():Void
+    function finish():Void
     {
         if (container != null && container.parent != null)
             FlxG.stage.removeChild(container);
@@ -90,15 +86,10 @@ class IntroState extends FlxState
 
     override public function destroy()
     {
-        if (video != null)
+        if (stream != null)
         {
-            video = null;
-        }
-
-        if (container != null)
-        {
-            FlxG.stage.removeChild(container);
-            container = null;
+            stream.close();
+            stream = null;
         }
 
         super.destroy();
