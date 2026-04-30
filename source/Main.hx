@@ -11,7 +11,7 @@ import flixel.FlxGame;
 import flixel.FlxState;
 
 import states.PlayState;
-import states.ConfigState;
+import ConfigState;
 
 #if sys
 import sys.FileSystem;
