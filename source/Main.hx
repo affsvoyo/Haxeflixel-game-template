@@ -1,17 +1,20 @@
 package;
 
 import openfl.display.Sprite;
+import openfl.display.StageAlign;
+import openfl.display.StageScaleMode;
 import openfl.media.Video;
 import openfl.net.NetConnection;
 import openfl.net.NetStream;
 import openfl.events.NetStatusEvent;
+import openfl.events.AsyncErrorEvent;
 import openfl.events.Event;
 
 import flixel.FlxGame;
 import flixel.FlxState;
 
 import states.PlayState;
-import ConfigState;
+import states.ConfigState;
 
 #if sys
 import sys.FileSystem;
@@ -25,10 +28,20 @@ class Main extends Sprite
     var video:Video;
     var nc:NetConnection;
     var ns:NetStream;
+    var startedGame:Bool = false;
 
     public function new()
     {
         super();
+        addEventListener(Event.ADDED_TO_STAGE, init);
+    }
+
+    function init(e:Event):Void
+    {
+        removeEventListener(Event.ADDED_TO_STAGE, init);
+
+        stage.align = StageAlign.TOP_LEFT;
+        stage.scaleMode = StageScaleMode.NO_SCALE;
 
         playIntroVideo();
     }
@@ -39,11 +52,17 @@ class Main extends Sprite
         nc.connect(null);
 
         ns = new NetStream(nc);
-        ns.client = { onMetaData: function(meta:Dynamic) {} };
-        ns.addEventListener(NetStatusEvent.NET_STATUS, onVideoStatus);
 
-        video = new Video();
+        ns.client = {
+            onMetaData: function(meta:Dynamic) {}
+        };
+
+        ns.addEventListener(NetStatusEvent.NET_STATUS, onVideoStatus);
+        ns.addEventListener(AsyncErrorEvent.ASYNC_ERROR, function(_) {});
+
+        video = new Video(stage.stageWidth, stage.stageHeight);
         video.attachNetStream(ns);
+
         addChild(video);
 
         stage.addEventListener(Event.RESIZE, onResize);
@@ -54,7 +73,7 @@ class Main extends Sprite
 
     function onResize(e:Event):Void
     {
-        if (video != null && stage != null)
+        if (video != null)
         {
             video.width = stage.stageWidth;
             video.height = stage.stageHeight;
@@ -63,18 +82,30 @@ class Main extends Sprite
 
     function onVideoStatus(e:NetStatusEvent):Void
     {
-        if (e.info.code == "NetStream.Play.Stop")
+        switch (e.info.code)
         {
-            startGame();
+            case "NetStream.Play.Stop":
+                if (!startedGame)
+                {
+                    startedGame = true;
+                    startGame();
+                }
+
+            case "NetStream.Play.StreamNotFound":
+                startGame();
         }
     }
 
     function startGame():Void
     {
-        if (video != null)
+        if (ns != null)
+        {
+            ns.close();
+        }
+
+        if (video != null && contains(video))
         {
             removeChild(video);
-            video = null;
         }
 
         if (stage != null)
