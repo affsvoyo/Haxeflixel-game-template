@@ -2,13 +2,12 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
-import flixel.util.FlxTimer;
 
+import openfl.display.Sprite;
 import openfl.media.Video;
 import openfl.net.NetConnection;
 import openfl.net.NetStream;
 import openfl.events.NetStatusEvent;
-import openfl.display.Sprite;
 
 import states.ConfigState;
 import states.PlayState;
@@ -20,46 +19,48 @@ import sys.io.File;
 
 class IntroState extends FlxState
 {
+    var videoLayer:Sprite;
     var video:Video;
     var stream:NetStream;
-    var container:Sprite;
 
     override public function create()
     {
         super.create();
 
-        container = new Sprite();
-        FlxG.stage.addChild(container);
+        // layer separada do Flixel (necessário para vídeo)
+        videoLayer = new Sprite();
+        FlxG.stage.addChild(videoLayer);
 
+        // conexão de vídeo
         var nc = new NetConnection();
         nc.connect(null);
 
         stream = new NetStream(nc);
 
+        // vídeo
         video = new Video();
         video.attachNetStream(stream);
 
-        container.addChild(video);
+        videoLayer.addChild(video);
 
-        stream.client = {};
-        stream.play("assets/videos/init.mp4");
-
+        // evento de fim
         stream.addEventListener(NetStatusEvent.NET_STATUS, onStatus);
+
+        // inicia vídeo
+        stream.play("assets/videos/init.mp4");
     }
 
     function onStatus(e:NetStatusEvent):Void
     {
-        if (e.info.code == "NetStream.Play.Stop")
+        if (e.info != null && e.info.code == "NetStream.Play.Stop")
         {
-            finish();
+            finishIntro();
         }
     }
 
-    function finish():Void
+    function finishIntro():Void
     {
-        if (container != null && container.parent != null)
-            FlxG.stage.removeChild(container);
-
+        cleanupVideo();
         decideNextState();
     }
 
@@ -84,14 +85,28 @@ class IntroState extends FlxState
         FlxG.switchState(nextState);
     }
 
-    override public function destroy()
+    function cleanupVideo():Void
     {
         if (stream != null)
         {
-            stream.close();
+            try stream.close() catch(e:Dynamic) {}
             stream = null;
         }
 
+        if (videoLayer != null)
+        {
+            if (videoLayer.parent != null)
+                FlxG.stage.removeChild(videoLayer);
+
+            videoLayer = null;
+        }
+
+        video = null;
+    }
+
+    override public function destroy()
+    {
+        cleanupVideo();
         super.destroy();
     }
 }
