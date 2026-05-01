@@ -458,8 +458,6 @@ class PlayState extends FlxState
 
         loader.loadBytes(fileRef.data);
     }
-            } }
-
     function loadImage():Void
     {
         fileRef = new FileReference();
