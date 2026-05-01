@@ -2,7 +2,8 @@ package;
 
 import openfl.display.Sprite;
 import flixel.FlxGame;
-import states.IntroState;
+import flixel.system.FlxSplash;
+
 class Main extends Sprite
 {
     public static var GLOBAL_FONT:String = "assets/fonts/vcr.ttf";
@@ -10,11 +11,13 @@ class Main extends Sprite
     public function new()
     {
         super();
-        
+
+        FlxSplash.nextState = states.IntroState;
+
         var game:FlxGame = new FlxGame(
             0,
             0,
-            IntroState,
+            FlxSplash,
             60,
             60,
             true
