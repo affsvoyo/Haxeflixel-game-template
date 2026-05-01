@@ -5,16 +5,15 @@ import flixel.FlxG;
 
 class SplashState extends FlxSplash
 {
-    override public function create():Void
-    {
-        super.create();
-    }
+    var splashTimer:Float = 0;
 
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
 
-        if (finished)
+        splashTimer += elapsed;
+
+        if (splashTimer >= 4)
         {
             FlxG.switchState(new IntroState());
         }
