@@ -14,17 +14,17 @@ class GlitchEffect extends FlxShader
     /**
      * How fast the waves move over time
      */
-    uniform float uSpeed = 1.0;
+    uniform float uSpeed;
     
     /**
      * Number of waves over time
      */
-    uniform float uFrequency = 5.0;
+    uniform float uFrequency;
     
     /**
      * How much the pixels are going to stretch over the waves
      */
-    uniform float uWaveAmplitude = 0.1;
+    uniform float uWaveAmplitude;
 
     vec2 sineWave(vec2 pt)
     {
