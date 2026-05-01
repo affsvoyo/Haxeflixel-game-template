@@ -14,6 +14,9 @@ import sys.FileSystem;
 
 class ConfigState extends FlxState
 {
+    
+    var bg:FlxSprite;
+    var shader:CustomWaveShader;
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
