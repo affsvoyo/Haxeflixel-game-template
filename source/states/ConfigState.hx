@@ -2,6 +2,7 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import states.PlayState;
@@ -14,13 +15,16 @@ import sys.FileSystem;
 
 class ConfigState extends FlxState
 {
-    
     var bg:FlxSprite;
     var shader:CustomWaveShader;
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
     var speed:Float = 2.0;
     var uiVisible:Bool = true;
+
+    var waveAmplitude2:Float = 0.1;
+    var frequency2:Float = 5.0;
+    var speed2:Float = 2.0;
 
     var ampText:FlxText;
     var freqText:FlxText;
@@ -29,16 +33,17 @@ class ConfigState extends FlxState
     override public function create():Void
     {
         super.create();
-        bg = new FlxSprite();
-        bg.loadGraphic("assets/images/Init/Initbg");
-        bg.ScreenCenter();
-        add(bg);
-        shader = new CustomWaveShader();
 
+        bg = new FlxSprite();
+        bg.loadGraphic("assets/images/Init/Initbg.png");
+        bg.screenCenter();
+        add(bg);
+
+        shader = new CustomWaveShader();
         shader.uTime.value = [0.0];
-        shader.uSpeed.value = [2.0];
-        shader.uFrequency.value = [5.0];
-        shader.uWaveAmplitude.value = [0.1];
+        shader.uSpeed.value = [speed2];
+        shader.uFrequency.value = [frequency2];
+        shader.uWaveAmplitude.value = [waveAmplitude2];
 
         bg.shader = shader;
 
@@ -46,7 +51,7 @@ class ConfigState extends FlxState
         FlxG.resizeGame(1280, 720);
         #end
 
-        var title = new FlxText(20, 20, 800, "Shader Default Settings");
+        var title:FlxText = new FlxText(20, 20, 800, "Shader Default Settings");
         title.size = 24;
         add(title);
 
@@ -116,11 +121,15 @@ class ConfigState extends FlxState
         ampText.text = "Wave Amplitude: " + waveAmplitude;
         freqText.text = "Frequency: " + frequency;
         speedText.text = "Speed: " + speed;
+
+        shader.uWaveAmplitude.value = [waveAmplitude];
+        shader.uFrequency.value = [frequency];
+        shader.uSpeed.value = [speed];
     }
 
     function saveSettings():Void
     {
-        var content =
+        var content:String =
             "waveAmplitude=" + waveAmplitude + "\n" +
             "frequency=" + frequency + "\n" +
             "speed=" + speed + "\n" +
