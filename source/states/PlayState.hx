@@ -29,6 +29,7 @@ import shader.WiggleEffect;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
+import sys.io.Process;
 #end
 
 class PlayState extends FlxState
@@ -58,6 +59,8 @@ class PlayState extends FlxState
 
     var recordBtn:FlxButton;
     var isRecording:Bool = false;
+    var recordingFPS:Int = 60;
+    var recordingFrames:Int = 20;
 
     override public function create():Void
     {
@@ -111,7 +114,7 @@ class PlayState extends FlxState
         add(resetBtn);
         uiElements.push(resetBtn);
 
-        recordBtn = new FlxButton(20, 380, "Record Video", function()
+        recordBtn = new FlxButton(20, 380, "Record MP4", function()
         {
             if (!isRecording)
                 startRecording();
@@ -248,16 +251,16 @@ class PlayState extends FlxState
 
         #if sys
         var folder:String = "recordings";
+        var output:String = folder + "/output_" + Date.now().getTime() + ".mp4";
 
         if (!FileSystem.exists(folder))
             FileSystem.createDirectory(folder);
 
-        var frames:Int = 300;
         var frameCount:Int = 0;
 
         var timer = new FlxTimer();
 
-        timer.start(1 / 60, function(tmr:FlxTimer)
+        timer.start(1 / recordingFPS, function(tmr:FlxTimer)
         {
             var bmp:BitmapData = new BitmapData(FlxG.width, FlxG.height);
             bmp.draw(FlxG.stage);
@@ -274,11 +277,49 @@ class PlayState extends FlxState
 
             frameCount++;
 
-            if (frameCount >= frames)
-                finishRecording();
+            if (frameCount >= recordingFrames)
+            {
+                timer.cancel();
+                convertFramesToVideo(folder, output);
+            }
 
-        }, frames);
+        }, recordingFrames);
         #end
+    }
+
+    function convertFramesToVideo(folder:String, output:String):Void
+    {
+        #if sys
+        try
+        {
+            var ffmpeg = new Process("ffmpeg", [
+                "-y",
+                "-framerate", Std.string(recordingFPS),
+                "-i", folder + "/frame_%05d.png",
+                "-c:v", "libx264",
+                "-pix_fmt", "yuv420p",
+                output
+            ]);
+
+            ffmpeg.close();
+
+            for (file in FileSystem.readDirectory(folder))
+            {
+                if (StringTools.endsWith(file, ".png"))
+                {
+                    FileSystem.deleteFile(folder + "/" + file);
+                }
+            }
+
+            FlxG.log.notice("MP4 saved to: " + output);
+        }
+        catch (e:Dynamic)
+        {
+            FlxG.log.error("FFmpeg conversion failed: " + Std.string(e));
+        }
+        #end
+
+        finishRecording();
     }
 
     function finishRecording():Void
@@ -291,7 +332,7 @@ class PlayState extends FlxState
             e.active = true;
         }
 
-        FlxG.log.notice("Recording complete! Frames saved in recordings folder.");
+        FlxG.log.notice("Recording complete!");
     }
 
     function resetDefaults():Void
@@ -389,6 +430,35 @@ class PlayState extends FlxState
         bg.updateHitbox();
         bg.screenCenter();
     }
+
+    function loadImage():Void
+    {
+        fileRef = new FileReference();
+        fileRef.addEventListener(Event.SELECT, onFileSelected);
+        fileRef.browse([new FileFilter("Images", "*.png;*.jpg;*.jpeg")]);
+    }
+
+    function onFileSelected(e:Event):Void
+    {
+        fileRef.addEventListener(Event.COMPLETE, onFileLoaded);
+        fileRef.load();
+    }
+
+    function onFileLoaded(e:Event):Void
+    {
+        var loader = new Loader();
+
+        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
+        {
+            var bmp:Bitmap = cast loader.content;
+            bg.loadGraphic(bmp.bitmapData);
+            fitImageToScreen();
+            bg.shader = shader;
+        });
+
+        loader.loadBytes(fileRef.data);
+    }
+            } }
 
     function loadImage():Void
     {
