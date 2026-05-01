@@ -33,6 +33,14 @@ class ConfigState extends FlxState
         bg.loadGraphic("assets/images/Init/Initbg");
         bg.ScreenCenter();
         add(bg);
+        shader = new CustomWaveShader();
+
+        shader.uTime.value = [0.0];
+        shader.uSpeed.value = [2.0];
+        shader.uFrequency.value = [5.0];
+        shader.uWaveAmplitude.value = [0.1];
+
+        bg.shader = shader;
 
         #if mobile
         FlxG.resizeGame(1280, 720);
