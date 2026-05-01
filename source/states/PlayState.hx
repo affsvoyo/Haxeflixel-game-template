@@ -7,6 +7,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -14,6 +15,10 @@ import openfl.events.UncaughtErrorEvent;
 import openfl.net.FileFilter;
 import openfl.display.Loader;
 import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+import openfl.display.PNGEncoderOptions;
+import openfl.geom.Rectangle;
+import openfl.utils.ByteArray;
 import openfl.Lib;
 
 import lime.app.Application;
@@ -37,7 +42,6 @@ class PlayState extends FlxState
     var speedText:FlxText;
     var timeText:FlxText;
     var versionText:FlxText;
-    var updatePrompt:FlxText;
 
     var waveAmplitude:Float = 0.1;
     var frequency:Float = 5.0;
@@ -50,15 +54,16 @@ class PlayState extends FlxState
     var uiElements:Array<Dynamic> = [];
 
     var defaultImage:String = "assets/images/bg/cheeseburger.png";
+    var currentVersion:String = "0.0.6";
 
-    var currentVersion:String = "0.0.7";
+    var recordBtn:FlxButton;
+    var isRecording:Bool = false;
 
     override public function create():Void
     {
         super.create();
 
         initCrashHandler();
-
         loadSettings();
 
         bg = new FlxSprite();
@@ -81,10 +86,6 @@ class PlayState extends FlxState
         versionText = new FlxText(20, FlxG.height - 50, 500, "Version: " + currentVersion);
         add(versionText);
         uiElements.push(versionText);
-
-        updatePrompt = new FlxText(100, FlxG.height / 2 - 40, 600, "");
-        updatePrompt.visible = false;
-        add(updatePrompt);
 
         var loadBtn = new FlxButton(20, 20, "Add Image", function()
         {
@@ -109,6 +110,14 @@ class PlayState extends FlxState
         });
         add(resetBtn);
         uiElements.push(resetBtn);
+
+        recordBtn = new FlxButton(20, 380, "Record Video", function()
+        {
+            if (!isRecording)
+                startRecording();
+        });
+        add(recordBtn);
+        uiElements.push(recordBtn);
 
         ampText = new FlxText(20, 70, 400, "Wave Amplitude: " + waveAmplitude);
         add(ampText);
@@ -170,22 +179,6 @@ class PlayState extends FlxState
         add(speedPlus);
         uiElements.push(speedPlus);
 
-        var brightMinus = new FlxButton(20, 300, "-", function()
-        {
-            brightness = Math.max(0, brightness - 0.1);
-            updateBrightness();
-        });
-        add(brightMinus);
-        uiElements.push(brightMinus);
-
-        var brightPlus = new FlxButton(120, 300, "+", function()
-        {
-            brightness = Math.min(1, brightness + 0.1);
-            updateBrightness();
-        });
-        add(brightPlus);
-        uiElements.push(brightPlus);
-
         timeText = new FlxText(20, 330, 400, "Time: 0");
         add(timeText);
         uiElements.push(timeText);
@@ -203,10 +196,7 @@ class PlayState extends FlxState
             UncaughtErrorEvent.UNCAUGHT_ERROR,
             function(e:UncaughtErrorEvent):Void
             {
-                var errorMsg:String = "Unknown Crash";
-
-                if (e.error != null)
-                    errorMsg = Std.string(e.error);
+                var errorMsg:String = e.error != null ? Std.string(e.error) : "Unknown Crash";
 
                 #if sys
                 try
@@ -214,23 +204,12 @@ class PlayState extends FlxState
                     if (!FileSystem.exists("crash"))
                         FileSystem.createDirectory("crash");
 
-                    var crashLog:String =
-                        "PlayState Crash Report\n" +
-                        "====================\n" +
-                        "Version: " + currentVersion + "\n" +
-                        "Error: " + errorMsg + "\n" +
-                        "WaveAmplitude: " + waveAmplitude + "\n" +
-                        "Frequency: " + frequency + "\n" +
-                        "Speed: " + speed + "\n" +
-                        "Brightness: " + brightness + "\n";
-
                     File.saveContent(
                         "crash/playstate_crash_" + Date.now().getTime() + ".txt",
-                        crashLog
+                        "Error: " + errorMsg
                     );
                 }
                 catch (saveError:Dynamic) {}
-
                 #end
 
                 FlxG.log.error("CRASH DETECTED: " + errorMsg);
@@ -243,10 +222,9 @@ class PlayState extends FlxState
         super.update(elapsed);
 
         shader.uTime.value[0] += elapsed;
-
         timeText.text = "Time: " + Std.string(Std.int(shader.uTime.value[0] * 100) / 100);
 
-        if (FlxG.keys.justPressed.SPACE)
+        if (FlxG.keys.justPressed.SPACE && !isRecording)
         {
             uiVisible = !uiVisible;
 
@@ -256,6 +234,64 @@ class PlayState extends FlxState
                 e.active = uiVisible;
             }
         }
+    }
+
+    function startRecording():Void
+    {
+        isRecording = true;
+
+        for (e in uiElements)
+        {
+            e.visible = false;
+            e.active = false;
+        }
+
+        #if sys
+        var folder:String = "recordings";
+
+        if (!FileSystem.exists(folder))
+            FileSystem.createDirectory(folder);
+
+        var frames:Int = 300;
+        var frameCount:Int = 0;
+
+        var timer = new FlxTimer();
+
+        timer.start(1 / 60, function(tmr:FlxTimer)
+        {
+            var bmp:BitmapData = new BitmapData(FlxG.width, FlxG.height);
+            bmp.draw(FlxG.stage);
+
+            var bytes:ByteArray = bmp.encode(
+                new Rectangle(0, 0, bmp.width, bmp.height),
+                new PNGEncoderOptions()
+            );
+
+            File.saveBytes(
+                folder + "/frame_" + StringTools.lpad("" + frameCount, "0", 5) + ".png",
+                bytes
+            );
+
+            frameCount++;
+
+            if (frameCount >= frames)
+                finishRecording();
+
+        }, frames);
+        #end
+    }
+
+    function finishRecording():Void
+    {
+        isRecording = false;
+
+        for (e in uiElements)
+        {
+            e.visible = true;
+            e.active = true;
+        }
+
+        FlxG.log.notice("Recording complete! Frames saved in recordings folder.");
     }
 
     function resetDefaults():Void
@@ -347,7 +383,6 @@ class PlayState extends FlxState
 
         var scaleX = FlxG.width / bg.width;
         var scaleY = FlxG.height / bg.height;
-
         var finalScale = Math.max(scaleX, scaleY);
 
         bg.scale.set(finalScale, finalScale);
@@ -382,4 +417,4 @@ class PlayState extends FlxState
 
         loader.loadBytes(fileRef.data);
     }
-            }
+}
