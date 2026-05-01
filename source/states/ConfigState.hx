@@ -145,4 +145,11 @@ class ConfigState extends FlxState
 
         FlxG.switchState(new PlayState());
     }
+
+    override public function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        shader.uTime.value[0] += elapsed;
+    }
 }
