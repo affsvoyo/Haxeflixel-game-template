@@ -22,7 +22,7 @@ import lime.ui.Window;
 
 import haxe.Http;
 
-import shader.CustomWaveShader;
+import shader.WiggleEffect;
 
     
 #if sys
@@ -33,7 +33,7 @@ import sys.FileSystem;
 class PlayState extends FlxState
 {
     var bg:FlxSprite;
-    var shader:CustomWaveShader;
+    var shader:WiggleEffect;
     var fileRef:FileReference;
 
     var ampText:FlxText;
@@ -87,7 +87,7 @@ class PlayState extends FlxState
         add(versionText);
         uiElements.push(versionText);
 
-        updatePrompt = new FlxText(FlxG.width / 2 - 300, FlxG.height / 2 - 40, 600, "");
+        updatePrompt = new FlxText(100, FlxG.height / 2 - 40, 600, "");
         updatePrompt.visible = false;
         add(updatePrompt);
 
