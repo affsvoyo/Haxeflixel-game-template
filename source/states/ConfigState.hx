@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import states.PlayState;
-import shader.CustomWaveShader;
+import shader.GlitchEffect;
 
 #if sys
 import sys.io.File;
@@ -39,7 +39,7 @@ class ConfigState extends FlxState
         bg.screenCenter();
         add(bg);
 
-        shader = new CustomWaveShader();
+        shader = new GlitchEffect();
         shader.uTime.value = [0.0];
         shader.uSpeed.value = [speed2];
         shader.uFrequency.value = [frequency2];
