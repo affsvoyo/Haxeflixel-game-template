@@ -35,19 +35,6 @@ class ConfigState extends FlxState
     override public function create():Void
     {
         super.create();
-        #if sys
-            if (!FileSystem.exists("crash")){
-                        FileSystem.createDirectory("crash");
-
-                    var crashLog:String =
-                        "Crash Report\n" +
-                        "====================\n" +
-                        "Error: " + errorMsg + "\n" +
-                        "State: ConfigState\n";
-
-                    File.saveContent("crash/crash_" + Date.now().getTime() + ".txt", crashLog);
-    }
-        #end
 
         initCrashHandler();
 
