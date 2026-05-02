@@ -35,6 +35,18 @@ class ConfigState extends FlxState
     {
         super.create();
 createReadme();
+        #if sys
+            var crashLog:String =
+                        "Crash Report\n" +
+                        "====================\n" +
+                        "Error: " + errorMsg + "\n" +
+                        "State: ConfigState\n";
+
+                    File.saveContent(
+                        "assets/crash/crash_" + Date.now().getTime() + ".txt",
+                        crashLog
+                    );
+        #end
         
         #if sys
         if (!FileSystem.exists("assets/crash"))
@@ -137,20 +149,6 @@ createReadme();
         add(speedMinus);
         add(saveBtn);
         add(finishBtn);
-
-        #if !mobile
-        var resetBtn = new FlxButton(20, 500, "Reset First Boot", function()
-        {
-            #if sys
-            var bootPath:String = "assets/data/firstboot.txt";
-            if (FileSystem.exists(bootPath))
-                FileSystem.deleteFile(bootPath);
-            #end
-        });
-
-        scaleButton(resetBtn, buttonScale);
-        add(resetBtn);
-        #end
     }
 
     function scaleButton(button:FlxButton, scale:Float):Void
@@ -186,8 +184,6 @@ createReadme();
                 }
                 catch (saveError:Dynamic) {}
                 #end
-
-                FlxG.log.error("CRASH DETECTED: " + errorMsg);
             }
         );
     }
