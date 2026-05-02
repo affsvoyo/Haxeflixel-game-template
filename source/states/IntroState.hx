@@ -2,11 +2,11 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxTimer;
 
 import states.ConfigState;
 import states.PlayState;
+
+import openfl.Assets;
 
 #if sys
 import sys.FileSystem;
@@ -18,14 +18,30 @@ class IntroState extends FlxState
     override public function create()
     {
         super.create();
-            decideNextState();
+        decideNextState();
     }
 
     function decideNextState():Void
     {
         var nextState:FlxState = new ConfigState();
+        var configured:Bool = false;
 
-        #if sys
+        #if android
+        // Mobile/Android usa assets embutidos
+        var bootPath:String = "assets/data/firstboot.txt";
+
+        if (Assets.exists(bootPath))
+        {
+            var content:String = Assets.getText(bootPath);
+
+            if (content != null && content.indexOf("configured=true") != -1)
+            {
+                configured = true;
+            }
+        }
+
+        #elseif sys
+        // Desktop
         var bootPath:String = "assets/data/firstboot.txt";
 
         if (FileSystem.exists(bootPath))
@@ -34,7 +50,19 @@ class IntroState extends FlxState
 
             if (content != null && content.indexOf("configured=true") != -1)
             {
-                nextState = new PlayState();
+                configured = true;
+            }
+        }
+        #end
+
+        if (configured)
+        {
+            nextState = new PlayState();
+        }
+
+        FlxG.switchState(nextState);
+    }
+}                nextState = new PlayState();
             }
         }
         #end
