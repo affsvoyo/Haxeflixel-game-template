@@ -277,30 +277,30 @@ class PlayState extends FlxState
     }
 
     function closeGame():Void
-    {
-        #if mobile
-        Lib.close();
+    function closeGame():Void
+{
+    #if mobile
+    #if sys
+    Sys.exit(0);
+    #end
 
-        #elseif desktop
-        var window:Window = Application.current.window;
+    #elseif desktop
+    var window:Window = Application.current.window;
 
-        FlxTween.tween(window, {
-            width: 100,
-            height: 60
-        }, 0.4, {
-            ease: FlxEase.quadIn,
-            onComplete: function(_)
-            {
-                #if sys
-                Sys.exit(0);
-                #else
-                Lib.close();
-                #end
-            }
-        });
-        #end
-    }
-
+    FlxTween.tween(window, {
+        width: 100,
+        height: 60
+    }, 0.4, {
+        ease: FlxEase.quadIn,
+        onComplete: function(_)
+        {
+            #if sys
+            Sys.exit(0);
+            #end
+        }
+    });
+    #end
+}
     function loadSettings():Void
     {
         #if mobile
