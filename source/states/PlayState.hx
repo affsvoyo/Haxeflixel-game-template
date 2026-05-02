@@ -279,12 +279,12 @@ class PlayState extends FlxState
     function closeGame():Void
     function closeGame():Void
 {
-    #if mobile
-    #if sys
-    Sys.exit(0);
-    #end
-
-    #elseif desktop
+#if mobile
+#if sys
+            Sys.exit(0);
+            #end
+        #end
+    #if desktop
     var window:Window = Application.current.window;
 
     FlxTween.tween(window, {
