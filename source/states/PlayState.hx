@@ -49,7 +49,7 @@ var uiVisible:Bool = true;
 var uiElements:Array<Dynamic> = [];  
 
 var defaultImage:String = "assets/images/bg/cheeseburger.png";  
-var currentVersion:String = "0.0.8 commit ";  
+var currentVersion:String = "0.0.8";  
 
 override public function create():Void  
 {  
