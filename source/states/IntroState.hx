@@ -15,7 +15,7 @@ import sys.io.File;
 
 class IntroState extends FlxState
 {
-    override public function create()
+    override public function create():Void
     {
         super.create();
         decideNextState();
@@ -23,11 +23,15 @@ class IntroState extends FlxState
 
     function decideNextState():Void
     {
-        var nextState:FlxState = new ConfigState();
         var configured:Bool = false;
 
-        #if android
-        // Mobile/Android usa assets embutidos
+        #if mobile
+        if (FlxG.save.data.configured != null && FlxG.save.data.configured == true)
+        {
+            configured = true;
+        }
+
+        #elseif android
         var bootPath:String = "assets/data/firstboot.txt";
 
         if (Assets.exists(bootPath))
@@ -41,7 +45,6 @@ class IntroState extends FlxState
         }
 
         #elseif sys
-        // Desktop
         var bootPath:String = "assets/data/firstboot.txt";
 
         if (FileSystem.exists(bootPath))
@@ -57,16 +60,11 @@ class IntroState extends FlxState
 
         if (configured)
         {
-            nextState = new PlayState();
+            FlxG.switchState(new PlayState());
         }
-
-        FlxG.switchState(nextState);
-    }
-}                nextState = new PlayState();
-            }
+        else
+        {
+            FlxG.switchState(new ConfigState());
         }
-        #end
-
-        FlxG.switchState(nextState);
     }
 }
