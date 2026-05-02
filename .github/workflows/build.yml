@@ -26,6 +26,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Cache Android Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/haxelib
+            export
+            ~/.gradle/caches
+            ~/.android/build-cache
+          key: android-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
+
       - name: Install Android Dependencies
         run: |
           yes | sdkmanager --licenses
@@ -47,7 +57,6 @@ jobs:
           haxelib install flixel-tools --quiet
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
-          haxelib install flixel-addons --quiet
 
       - name: Run Setups
         shell: bash
@@ -72,6 +81,7 @@ jobs:
           name: Strident-Crisis-Shader-generator-android
           path: export/android/bin/app/build/outputs/apk/*.apk
           if-no-files-found: error
+
   windows:
     runs-on: windows-latest
 
@@ -90,7 +100,7 @@ jobs:
           path: |
             C:\Users\runneradmin\haxelib
             export
-          key: ${{ runner.os }}-haxe-${{ hashFiles('**/Project.xml') }}
+          key: windows-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
 
       - name: Install Libraries
         shell: bash
