@@ -101,6 +101,10 @@ jobs:
             export
           key: windows-${{ runner.os }}-${{ hashFiles('**/Project.xml') }}
 
+      - name: setup haxelib working repository
+        run: |
+          haxelib setup ~/haxelib
+
       - name: Install Libraries
         shell: bash
         run: |
