@@ -64,6 +64,7 @@ jobs:
           haxelib install flixel-tools --quiet
           haxelib install flixel-addons --quiet
           haxelib install hxcpp --quiet
+          haxelib install flixel-ui --quiet
 
       - name: Run Lime Setup
         shell: bash
