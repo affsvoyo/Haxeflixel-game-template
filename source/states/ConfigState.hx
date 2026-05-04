@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+import flixel.group.FlxGroup;
 import openfl.Lib;
 import openfl.events.UncaughtErrorEvent;
 import openfl.utils.Assets;
@@ -31,10 +32,18 @@ class ConfigState extends FlxState
     var freqText:FlxText;
     var speedText:FlxText;
 
+    // POPUP
+    var popupBg:FlxSprite;
+    var popupBox:FlxSprite;
+    var popupText:FlxText;
+    var popupBtn:FlxButton;
+
     override public function create():Void
     {
         super.create();
-createReadme();
+
+        createReadme();
+
         #if sys
         if (!FileSystem.exists("assets/crash"))
             FileSystem.createDirectory("assets/crash");
@@ -73,11 +82,63 @@ createReadme();
 
         createButtons();
         updateTexts();
+
+        // POPUP BETA
+        createBetaPopup();
     }
+
+    // =========================
+    // POPUP
+    // =========================
+
+    function createBetaPopup():Void
+    {
+        popupBg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xAA000000);
+        popupBg.scrollFactor.set(0, 0);
+        add(popupBg);
+
+        popupBox = new FlxSprite().makeGraphic(520, 260, 0xFF1A1A1A);
+        popupBox.screenCenter();
+        popupBox.scrollFactor.set(0, 0);
+        add(popupBox);
+
+        popupText = new FlxText(0, 0, 500,
+            "BETA VERSION\n\n" +
+            "This game is currently in BETA.\n" +
+            "You may encounter bugs, glitches\n" +
+            "or unfinished features.\n\n" +
+            "Enjoy and report issues if you find any!",
+            18
+        );
+        popupText.alignment = "center";
+        popupText.screenCenter();
+        popupText.y -= 40;
+        add(popupText);
+
+        popupBtn = new FlxButton(0, 0, "OK", function()
+        {
+            removePopup();
+        });
+
+        popupBtn.screenCenter();
+        popupBtn.y += 90;
+        add(popupBtn);
+    }
+
+    function removePopup():Void
+    {
+        remove(popupBg);
+        remove(popupBox);
+        remove(popupText);
+        remove(popupBtn);
+    }
+
+    // =========================
+    // BUTTONS
+    // =========================
 
     function createButtons():Void
     {
-        var spacing:Int = #if mobile 80 #else 40 #end;
         var buttonScale:Float = #if mobile 1.5 #else 1.0 #end;
 
         var ampPlus = new FlxButton(20, 120, "Amplitude +", function()
@@ -144,6 +205,10 @@ createReadme();
         button.updateHitbox();
     }
 
+    // =========================
+    // CRASH HANDLER
+    // =========================
+
     function initCrashHandler():Void
     {
         Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
@@ -159,8 +224,7 @@ createReadme();
                         FileSystem.createDirectory("assets/crash");
 
                     var crashLog:String =
-                        "Crash Report\n" +
-                        "====================\n" +
+                        "Crash Report\n====================\n" +
                         "Error: " + errorMsg + "\n" +
                         "State: ConfigState\n";
 
@@ -175,6 +239,10 @@ createReadme();
         );
     }
 
+    // =========================
+    // UI UPDATE
+    // =========================
+
     function updateTexts():Void
     {
         ampText.text = "Wave Amplitude: " + waveAmplitude;
@@ -185,6 +253,10 @@ createReadme();
         shader.uFrequency.value = [frequency];
         shader.uSpeed.value = [speed];
     }
+
+    // =========================
+    // SAVE
+    // =========================
 
     function saveSettings():Void
     {
@@ -221,104 +293,22 @@ createReadme();
         FlxG.switchState(new PlayState());
     }
 
+    // =========================
+    // README
+    // =========================
+
     function createReadme():Void
-{
-    #if sys
-    var readmePath:String = "do NOT readme.txt";
-
-    if (!FileSystem.exists(readmePath))
     {
-        var readmeContent:String =
-" ███████╗████████╗██████╗ ██╗██████╗ ███████╗███╗   ██╗████████╗" +
-" ██╔════╝╚══██╔══╝██╔══██╗██║██╔══██╗██╔════╝████╗  ██║╚══██╔══╝" +
-" ███████╗   ██║   ██████╔╝██║██║  ██║█████╗  ██╔██╗ ██║   ██║   " +
-" ╚════██║   ██║   ██╔══██╗██║██║  ██║██╔══╝  ██║╚██╗██║   ██║   " +
-" ███████║   ██║   ██║  ██║██║██████╔╝███████╗██║ ╚████║   ██║   " +
-" ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   " +
+        #if sys
+        var readmePath:String = "do NOT readme.txt";
 
-"STRIDENT CRISIS SHADER GENERATOR\n" +
-"========================================\n\n" +
-
-"HEY!\n" +
-"Thanks for downloading Strident Crisis Shader Generator!\n\n" +
-
-"This project is a visual rendering and shader development framework.\n" +
-"It allows advanced shader generation, glitch systems, wave distortions,\n" +
-"CRT simulation, corruption effects, and full visual experimentation.\n\n" +
-
-"##################################################################################\n" +
-"PERMISSIONS\n" +
-"##################################################################################\n\n" +
-
-"You have FULL PERMISSION to:\n" +
-"- Modify\n" +
-"- Fork\n" +
-"- Expand\n" +
-"- Stream\n" +
-"- Upload\n" +
-"- Showcase\n" +
-"- Monetize original creations\n" +
-"- Build your own systems\n\n" +
-
-"##################################################################################\n" +
-"CORE FEATURES\n" +
-"##################################################################################\n\n" +
-
-"- Real-time shader editing\n" +
-"- Wave systems\n" +
-"- Glitch effects\n" +
-"- RGB split\n" +
-"- CRT filters\n" +
-"- Bloom layers\n" +
-"- Visual corruption systems\n" +
-"- HaxeFlixel integration\n" +
-"- Mobile/Desktop support\n" +
-"- Export systems\n\n" +
-
-"##################################################################################\n" +
-"CONFIG SYSTEM\n" +
-"##################################################################################\n\n" +
-
-"This setup menu allows:\n" +
-"- Default shader configuration\n" +
-"- Amplitude tuning\n" +
-"- Frequency tuning\n" +
-"- Speed tuning\n" +
-"- First boot initialization\n" +
-"- Crash logging\n" +
-"- Save management\n\n" +
-
-"##################################################################################\n" +
-"WARNING\n" +
-"##################################################################################\n\n" +
-
-"Heavy shader combinations may:\n" +
-"- Reduce FPS\n" +
-"- Increase compile times\n" +
-"- Cause mobile lag\n" +
-"- Stress GPUs\n\n" +
-
-"Optimize before release.\n\n" +
-
-"##################################################################################\n" +
-"FINAL WORDS\n" +
-"##################################################################################\n\n" +
-
-"Build impossible visuals.\n" +
-"Push HaxeFlixel beyond normal limits.\n" +
-"Create chaos.\n" +
-"Create style.\n" +
-"Create STRIDENT CRISIS.\n\n" +
-
-"System Status:\n" +
-"[VISUAL CORE ACTIVE]\n" +
-"[SHADER ENGINE READY]\n" +
-"[GENERATOR ONLINE]\n";
-
-        File.saveContent(readmePath, readmeContent);
+        if (!FileSystem.exists(readmePath))
+        {
+            var readmeContent:String = "STRIDENT CRISIS SHADER GENERATOR...\n(omitted for brevity)";
+            File.saveContent(readmePath, readmeContent);
+        }
+        #end
     }
-    #end
-}
 
     override public function update(elapsed:Float):Void
     {
